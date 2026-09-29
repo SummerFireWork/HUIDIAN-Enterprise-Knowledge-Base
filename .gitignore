@@ -1,4 +1,4 @@
-﻿# OS / editor
+# OS / editor
 .DS_Store
 Thumbs.db
 *.swp
@@ -7,7 +7,3 @@ Thumbs.db
 *.log
 *.gif.tmp
 logs/
-
-# Local demo artifacts
-*.mp4
-!docs/oss/assets/demo-video.mp4

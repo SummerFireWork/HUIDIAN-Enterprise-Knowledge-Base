@@ -20,12 +20,11 @@ From a searchable archive to the "second brain" of an engineering design institu
   <img src="docs/oss/assets/screenshot-placeholder.svg" alt="System UI screenshot (to be replaced)" width="820">
 </p>
 
-## 🖥️ Online Demo
+## 🖥️ Demo Walkthrough (video)
 
-> **Coming soon** — a read-only public demo (search + RAG Q&A).
-> The demo runs on **synthetic / public sample documents only** (no organization data), with per-visitor rate limiting.
->
-> Demo URL: `https://demo.huidian.example.com` · guest account: `guest / guest123`  ← replace with the published link.
+> 🎬 **Video placeholder** — record a 15–30 s walkthrough (search → facets → deep pagination → SSE Q&A with citations)
+> and save it as `docs/oss/assets/demo-video.mp4` (the README references it automatically).
+> Checklist: [`docs/oss/README.md`](docs/oss/README.md).
 
 <p align="center">
   <video width="860" controls poster="docs/oss/assets/screenshot-placeholder.svg">
@@ -33,9 +32,6 @@ From a searchable archive to the "second brain" of an engineering design institu
     Your browser does not support the video tag — a recorded walkthrough will be published here.
   </video>
 </p>
-
-> 🎬 **Video placeholder** — record a 15–30 s walkthrough (search → facets → deep pagination → SSE Q&A with citations)
-> and save it as `docs/oss/assets/demo-video.mp4`. Checklist: [`docs/oss/README.md`](docs/oss/README.md).
 
 ## ✨ Highlights
 
@@ -59,23 +55,30 @@ From a searchable archive to the "second brain" of an engineering design institu
 - **Event-driven parsing pipeline**: `parse → enrich → review → vector` driven by RabbitMQ (local channel in dev), every step idempotent and retryable;
 - **Hard permission filtering**: ACL is dual-written to PG and ES; search queries inject ACL filters at query-build time, eliminating TOCTOU.
 
-## 🚀 Try the Demo & Source Availability
+## 🚀 One-Click Local Demo (Docker Compose)
 
-> **Try it** — use the [Online Demo](#-online-demo) above; the read-only instance is the fastest way to experience
-> hybrid search and streaming Q&A with citations.
->
-> **Source** — the complete backend/frontend source and the 5-minute local reproduction are intentionally **not**
-> part of this pre-release surface. They will be published with the **full open-source release** once the planned
-> knowledge-graph upgrade lands (see [ROADMAP](ROADMAP.md) · P5). Issues, discussions and architecture feedback
-> are welcome in the meantime.
+> **Run the full system — backend + frontend — with prebuilt artifacts. No source code, no build steps.**
+
+```bash
+# ① Start all 7 services (frontend + API + middleware)
+docker compose up -d
+#    → UI & API: http://localhost:8081   (demo account: admin / admin123; dev mode also allows guest access)
+
+# ② Seed synthetic demo documents (optional — validates the search & Q&A loop)
+bash scripts/seed-demo.sh
+```
+
+- **Prebuilt artifact**: `release/huidian-kb.jar` — backend + frontend packaged as one runnable jar (Java 21, zero source code required);
+- **Demo data**: `release/demo-docs/*.txt` — synthetic sample documents only, **no organization data**, safe to share;
+- **Deployment topology** (below): Docker Compose, 7 services — PostgreSQL / Elasticsearch / MinIO / RabbitMQ / Redis / BGE-M3 mock embedding / kb-app, each with health checks;
 
 <p align="center">
   <img src="docs/oss/assets/quickstart.svg" alt="Deployment topology" width="960">
 </p>
 
-> The diagram above is the production deployment topology: Docker Compose, 7 services
-> (PostgreSQL / Elasticsearch / MinIO / RabbitMQ / Redis / BGE-M3 embedding / kb-app), health checks, backup scripts.
-> Full reproduction steps accompany the P5 source release.
+> **Source availability**: the complete backend/frontend source and a from-scratch reproduction will be published
+> with the **full open-source release** after the planned knowledge-graph upgrade (see [ROADMAP](ROADMAP.md) · P5).
+> Issues, discussions and architecture feedback are welcome in the meantime.
 
 ## 🧰 Tech Stack
 
@@ -96,13 +99,19 @@ From a searchable archive to the "second brain" of an engineering design institu
 ```
 .
 ├─ README.md / LICENSE (Apache-2.0) / ROADMAP.md
+├─ docker-compose.yml        # one-click demo: 7 services, prebuilt jar, health checks
+├─ release/
+│  ├─ huidian-kb.jar         # prebuilt backend+frontend (Java 21, no source required)
+│  ├─ demo-docs/             # synthetic sample documents (safe to share)
+│  └─ scripts/seed-demo.sh   # optional: seed the demo knowledge base
+├─ es/ bge-m3-mock/          # ES config (IK plugin) & embedding mock service
 └─ docs/
    ├─ oss/           # open-source assets — architecture / quickstart / benchmark diagrams, screenshot checklist
    ├─ adr/           # architecture decision records (ADR-001..003)
    ├─ algorithms/    # standalone algorithm sketches (RRF fusion, dependency-free)
    └─ api/           # sanitized public OpenAPI subset (search + streaming Q&A)
 ```
-> The full multi-module codebase (`backend/` · `frontend/` · `design/`) is kept private until the P5 full release — see [ROADMAP](ROADMAP.md).
+> The full multi-module source (`backend/` · `frontend/` · `design/`) is kept private until the P5 full release — see [ROADMAP](ROADMAP.md).
 
 ## 📈 Benchmark & Performance
 

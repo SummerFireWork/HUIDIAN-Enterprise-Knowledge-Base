@@ -1,0 +1,5 @@
+# 路知通 2.0 kb-es 自定义配置（compose 挂载覆盖官方默认模板）
+# 注意：必须保留 network.host: 0.0.0.0，否则 ES 只绑 127.0.0.1，宿主/其他容器连不上
+network.host: 0.0.0.0
+# M12 备份：FS snapshot repository 根目录（named volume kb-es-snap 挂载点）
+path.repo: /usr/share/elasticsearch/snapshots

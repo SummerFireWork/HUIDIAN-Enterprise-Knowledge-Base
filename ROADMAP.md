@@ -14,6 +14,12 @@ ADRs, algorithm notebooks, benchmark summaries). The core implementation is kept
 IP-boundary decision — the system was architected and engineered for a real organization's pilot, so its
 codebase, data and internal design documents are not part of this repository.
 
+## Try it now
+
+**No server, no source code needed**: the repo ships a prebuilt artifact (elease/huidian-kb.jar,
+backend + frontend in one jar) and a one-command docker compose up -d demo environment.
+See README → *One-Click Local Demo*. Demo documents are synthetic samples; no organization data is involved.
+
 ## Why it matters
 
 The public repo is the *front door*: it proves the architecture decisions, the measured results and the

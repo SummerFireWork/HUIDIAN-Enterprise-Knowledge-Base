@@ -1,0 +1,152 @@
+# HUIDIAN 2.0 一键演示环境（Docker Compose）
+# 用法：docker compose up -d   （首次构建无需任何手工步骤，kb-app 内置前端页面）
+# 访问：http://localhost:8081  （前端 + API 同源；演示账号 admin/admin123，dev 模式亦可免登录）
+# 服务：PG15 / MinIO / ES 8.17(IK) / RabbitMQ / Redis / BGE-M3 mock / kb-app(后端+前端一体)
+# 安全说明：本编排仅用于本地演示，全部为演示凭据；生产部署请注入真实密钥（见 ROADMAP / ADR）。
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: kb-pg
+    environment:
+      POSTGRES_DB: huidian
+      POSTGRES_USER: huidian
+      POSTGRES_PASSWORD: huidian-demo-2026
+    ports:
+      - "5432:5432"
+    volumes:
+      - kb-pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U huidian -d huidian"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: kb-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: huidian
+      MINIO_ROOT_PASSWORD: huidian-minio-2026
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - kb-minio-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/9000'"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.4
+    container_name: kb-es
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      xpack.license.self_generated.type: trial
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+    ports:
+      - "9211:9200"   # 若宿主 9200 已被占用，可改此映射（应用经 KB_ES_URIS 访问）
+    volumes:
+      - kb-es-data:/usr/share/elasticsearch/data
+      - ./es/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+      - ./es/plugins/analysis-ik:/usr/share/elasticsearch/plugins/analysis-ik:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health?wait_for_status=yellow || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: kb-mq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "-rabbit loopback_users []"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - kb-mq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    container_name: kb-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  bge-m3-mock:
+    image: python:3.11-slim
+    container_name: kb-bge-m3-mock
+    command: python /app/server.py
+    volumes:
+      - ./bge-m3-mock/server.py:/app/server.py
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request;urllib.request.urlopen('http://localhost:8000/info')\""]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # ---- kb-app：后端 + 前端一体化（编译产物，无源码）----
+  # 使用 dev 演示 profile：本地 text-extract 解析（无需解析引擎容器）、mock 向量、免登录调试
+  kb-app:
+    image: eclipse-temurin:21-jre
+    container_name: kb-app
+    depends_on:
+      postgres: { condition: service_healthy }
+      minio: { condition: service_healthy }
+      elasticsearch: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      bge-m3-mock: { condition: service_healthy }
+    environment:
+      KB_PROFILE: dev
+      KB_DB_USER: huidian
+      KB_DB_PASSWORD: huidian-demo-2026
+      KB_DB_URL: jdbc:postgresql://postgres:5432/huidian
+      KB_MINIO_ENDPOINT: http://minio:9000
+      KB_MINIO_PUBLIC_ENDPOINT: http://localhost:9000   # 预签名 URL 对外地址（浏览器经宿主机 9000 访问 MinIO）
+      KB_MINIO_ACCESS_KEY: huidian
+      KB_MINIO_SECRET_KEY: huidian-minio-2026
+      KB_ES_URIS: http://elasticsearch:9200
+      KB_MQ_HOST: rabbitmq
+      KB_MQ_PORT: "5672"
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_DATA_REDIS_HOST: redis
+      KB_BGE_M3_URL: http://bge-m3-mock:8000
+      KB_REDIS_HOST: redis
+      KB_JWT_SECRET: huidian-demo-secret-at-least-32-chars-2026   # 仅演示；生产由部署注入
+    command: ["java", "-jar", "/app/huidian-kb.jar"]
+    ports:
+      - "8081:8080"   # 宿主 8080 若空闲可改为 "8080:8080"
+    volumes:
+      - ./release/huidian-kb.jar:/app/huidian-kb.jar:ro
+      - kb-app-logs:/var/log/huidian
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/8080'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+
+volumes:
+  kb-pg-data:
+  kb-minio-data:
+  kb-es-data:
+  kb-mq-data:
+  kb-app-logs:
