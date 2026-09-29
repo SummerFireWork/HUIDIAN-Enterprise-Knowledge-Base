@@ -1,0 +1,157 @@
+openapi: 3.0.1
+info:
+  title: HUIDIAN Demo Contract (public subset)
+  version: 1.0.0-demo
+  description: >
+    A **sanitized, reduced** subset of the HUIDIAN API, published for demonstration purposes only.
+    It covers the two core read paths — hybrid search and SSE streaming Q&A — with generic field names.
+    The full internal contract (67 paths / 131 schemas) is proprietary and intentionally not published.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+
+servers:
+  - url: https://demo.example.com/api/v1
+    description: Public read-only demo (rate-limited)
+
+paths:
+  /search:
+    post:
+      summary: Hybrid search (BM25 + KNN + RRF) with facets, highlight and deep pagination
+      operationId: search
+      description: >
+        Rank-only fusion of keyword and semantic retrievers. ACL filtering is applied server-side
+        at query-build time (filters injected into every retriever), so permission checks happen
+        before recall. Vector unavailability degrades the request to pure BM25 (degraded=true).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+
+  /qa/chat:
+    post:
+      summary: Streaming RAG Q&A over SSE
+      operationId: qaChat
+      description: >
+        Server-Sent Events stream. Event protocol:
+        `event=answer` (QaAnswer) → `event=done` ({"sessionId": "..."}) → close;
+        `event=error` on failure. Every answer is required to carry citations
+        (answers without citations are considered failed).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QaChatRequest'
+      responses:
+        '200':
+          description: text/event-stream (see event protocol above)
+          content:
+            text/event-stream:
+              schema:
+                type: string
+
+components:
+  schemas:
+    SearchRequest:
+      type: object
+      required: [query]
+      properties:
+        query:
+          type: string
+          description: Search text (IK-analyzed)
+        pagination:
+          type: object
+          properties:
+            pageSize:
+              type: integer
+              maximum: 50
+              default: 20
+            searchAfter:
+              type: array
+              items: {}
+              description: Opaque cursor from the previous page (deep pagination, no from/size)
+        filters:
+          type: array
+          description: Facet filters applied as post-filter
+          items:
+            type: object
+            properties:
+              field: { type: string }
+              values: { type: array, items: { type: string } }
+        scope:
+          type: object
+          description: Optional narrowing hint (never a privilege mechanism — ACL is server-enforced)
+          properties:
+            kbIds: { type: array, items: { type: integer } }
+
+    SearchResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchHit'
+        facets:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: object
+              properties:
+                value: { type: string }
+                count: { type: integer }
+        tookMs: { type: integer }
+        degraded:
+          type: boolean
+          description: true when vectorization was unavailable and search fell back to pure BM25
+
+    SearchHit:
+      type: object
+      properties:
+        chunkId: { type: string }
+        docId: { type: integer }
+        score: { type: number }
+        content: { type: string, description: Snippet with highlight tags }
+        headingPath:
+          type: string
+          description: Chapter/section path, e.g. "3.2 → 3.2.1 → anchorage" (used for page-level anchoring)
+        fileMeta:
+          type: object
+          properties:
+            title: { type: string }
+            fileType: { type: string }
+
+    QaChatRequest:
+      type: object
+      required: [query]
+      properties:
+        sessionId: { type: string, description: Optional; omitted = new session }
+        query: { type: string }
+
+    QaAnswer:
+      type: object
+      properties:
+        sessionId: { type: string }
+        text: { type: string, description: Answer fragment (streamed) }
+        citations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Citation'
+
+    Citation:
+      type: object
+      properties:
+        chunkId: { type: string }
+        docId: { type: integer }
+        headingPath: { type: string }
+        snippet: { type: string }

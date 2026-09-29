@@ -1,0 +1,13 @@
+﻿# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+
+# Logs & artifacts (never in a public repo)
+*.log
+*.gif.tmp
+logs/
+
+# Local demo artifacts
+*.mp4
+!docs/oss/assets/demo-video.mp4
