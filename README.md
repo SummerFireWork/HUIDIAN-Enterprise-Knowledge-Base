@@ -62,10 +62,10 @@ From a searchable archive to the "second brain" of an engineering design institu
 ```bash
 # ① Start all 7 services (frontend + API + middleware)
 docker compose up -d
-#    → UI & API: http://localhost:8081   (demo account: admin / admin123; dev mode also allows guest access)
+#    → UI & API: http://localhost:8081/api/v1/   (dev profile: no login required, guest access)
 
 # ② Seed synthetic demo documents (optional — validates the search & Q&A loop)
-bash scripts/seed-demo.sh
+bash release/scripts/seed-demo.sh
 ```
 
 - **Prebuilt artifact**: `release/huidian-kb.jar` — backend + frontend packaged as one runnable jar (Java 21, zero source code required);

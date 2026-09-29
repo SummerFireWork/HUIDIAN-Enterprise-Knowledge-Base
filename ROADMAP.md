@@ -16,7 +16,7 @@ codebase, data and internal design documents are not part of this repository.
 
 ## Try it now
 
-**No server, no source code needed**: the repo ships a prebuilt artifact (elease/huidian-kb.jar,
+**No server, no source code needed**: the repo ships a prebuilt artifact (`release/huidian-kb.jar`,
 backend + frontend in one jar) and a one-command docker compose up -d demo environment.
 See README → *One-Click Local Demo*. Demo documents are synthetic samples; no organization data is involved.
 

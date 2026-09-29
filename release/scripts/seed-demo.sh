@@ -41,7 +41,7 @@ else
   echo "==> 创建演示知识库 ..."
   RESP=$(curl -sf -X POST "${BASE}/kbs" \
     -H 'Content-Type: application/json' \
-    -d "{\"name\":\"${KB_NAME}\",\"description\":\"合成演示文档，可自由使用与删除\"}")
+    -d "{\"name\":\"${KB_NAME}\",\"description\":\"合成演示文档，可自由使用与删除\",\"kb_type\":\"PERSONAL\"}")
   KB_ID=$(echo "$RESP" | get "['data']['id']")
   echo "    创建成功 kb_id=${KB_ID}"
 fi
@@ -80,7 +80,7 @@ import sys,json
 for it in json.load(sys.stdin):
     print(it.get('fileId') or it.get('id'))
 " ); do
-    ST=$(curl -sf "${BASE}/files/${fid}/status" | get "['data']['status']")
+    ST=$(curl -sf "${BASE}/files/${fid}/status" | get "['data']['rawStatus']")
     echo "    file ${fid}: ${ST}"
     [ "$ST" != "INDEXED" ] && ALL_OK=0
   done
