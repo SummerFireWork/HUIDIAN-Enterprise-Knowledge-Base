@@ -63,7 +63,7 @@ From a searchable archive to the "second brain" of an engineering design institu
 ```bash
 # ① Start all 8 services (frontend + API + middleware + nginx gateway)
 docker compose up -d
-#    → UI & API: http://localhost:8081/  (nginx root redirects to /api/v1/; dev profile: no login required, guest access)
+#    → UI & API: http://127.0.0.1:8081/  (nginx root redirects to /api/v1/; dev profile: no login required, guest access)
 #    → sign in: admin / admin123
 
 # ② Seed synthetic demo documents (optional — validates the search & Q&A loop)

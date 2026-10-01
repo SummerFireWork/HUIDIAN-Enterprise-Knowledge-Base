@@ -1,6 +1,6 @@
 # HUIDIAN 2.0 一键演示环境（Docker Compose）
 # 用法：docker compose up -d   （首次构建无需任何手工步骤，kb-app 内置前端页面）
-# 访问：http://localhost:8081   （仅 nginx 网关对外暴露；前端 + API 同源；演示账号 admin/admin123）
+# 访问：http://127.0.0.1:8081   （仅 nginx 网关对外暴露；前端 + API 同源；演示账号 admin/admin123）
 # 服务：nginx(网关) / PG15 / MinIO / ES 8.17(IK) / RabbitMQ / Redis / BGE-M3 mock / kb-app(后端+前端一体)
 # 安全说明：
 #   * 中间件（PG/MinIO/ES/RabbitMQ/Redis/mock）不映射宿主端口，仅容器内网通信；
@@ -138,7 +138,7 @@ services:
     depends_on:
       kb-app: { condition: service_healthy }
     ports:
-      - "8081:80"     # 唯一对外端口（本机 localhost 访问：前端 + API）
+      - "8081:80"     # 唯一对外端口（本机访问：http://127.0.0.1:8081 前端 + API）
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     healthcheck:
