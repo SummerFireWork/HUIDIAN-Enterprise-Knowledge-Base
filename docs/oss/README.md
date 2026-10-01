@@ -11,7 +11,7 @@
 | `assets/quickstart.svg` | Quick-start flow (README "Quick Start" section) | ✅ generated (1600×640) |
 | `assets/eval-benchmark.svg` | Benchmark & performance figure (README "Benchmark" section) | ✅ generated (real measured numbers) |
 | `assets/screenshot-placeholder.svg` | Generic screenshot placeholder (README preview & highlights) | ✅ generated (1280×720) |
-| `assets/demo-video.mp4` | Demo walkthrough video (README "Online Demo" section) | ⬜ placeholder — record & drop here (see §5) |
+| `assets/demo-video.mp4` | Demo walkthrough video (README "Demo Walkthrough" section) | ✅ recorded (37 MB, 1280×720) |
 
 ## 2. Screenshot Replacement Checklist (execute before release)
 
@@ -35,7 +35,7 @@ Each item below is a placeholder in the README that **must** be replaced. Method
 
 | Item | Where it goes | Status |
 |---|---|---|
-| Record a 15–30 s walkthrough: search → facets → deep pagination → SSE Q&A with citations | `assets/demo-video.mp4` (16:9, ≤ 10 MB recommended) | ⬜ todo |
+| Record a 15–30 s walkthrough: search → facets → deep pagination → SSE Q&A with citations | `assets/demo-video.mp4` (16:9, ≤ 10 MB recommended) | ✅ done (2026-10-01, 37 MB) |
 | Place the demo URL (published link) into the README "Online Demo" section | `README.md` · `Online Demo` | ⬜ todo (deployment later) |
 | Sanity rule | demo data is **synthetic/public samples only** — never record or publish organization documents | ✅ rule fixed |
 

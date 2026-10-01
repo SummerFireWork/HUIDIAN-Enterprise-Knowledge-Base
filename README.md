@@ -22,9 +22,8 @@ From a searchable archive to the "second brain" of an engineering design institu
 
 ## 🖥️ Demo Walkthrough (video)
 
-> 🎬 **Video placeholder** — record a 15–30 s walkthrough (search → facets → deep pagination → SSE Q&A with citations)
-> and save it as `docs/oss/assets/demo-video.mp4` (the README references it automatically).
-> Checklist: [`docs/oss/README.md`](docs/oss/README.md).
+> 🎬 Recorded walkthrough: login → search (hybrid + facets) → original-text preview → SSE Q&A with citations.
+> (37 MB · 1280×720 · recorded on the one-click demo stack.)
 
 <p align="center">
   <video width="860" controls poster="docs/oss/assets/screenshot-placeholder.svg">
