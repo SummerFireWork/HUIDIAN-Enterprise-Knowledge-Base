@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="760" viewBox="0 0 1600 760" font-family="'Segoe UI','Microsoft YaHei','PingFang SC',sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#081d31"/>
+      <stop offset="1" stop-color="#0B3D5C"/>
+    </linearGradient>
+    <linearGradient id="barA" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#1F6FB2"/>
+      <stop offset="1" stop-color="#35C2E4"/>
+    </linearGradient>
+    <linearGradient id="barB" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#E8930C"/>
+      <stop offset="1" stop-color="#F5B942"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="760" fill="url(#bg)"/>
+  <circle cx="1500" cy="90" r="220" fill="#35C2E4" opacity="0.06"/>
+
+  <text x="80" y="62" font-size="32" font-weight="700" fill="#ffffff">Benchmark &amp; Performance</text>
+  <text x="82" y="94" font-size="15" fill="#9fc3dd">Source: local benchmark (2026-09, 100k synthetic standards chunks ingested) · replace with fresh measurements before release</text>
+
+  <!-- Panel 1: search latency -->
+  <g transform="translate(80,130)" filter="url(#shadow)">
+    <rect width="720" height="330" rx="16" fill="#0e3a5c" stroke="#3d6e92" stroke-width="1.5"/>
+    <text x="28" y="34" font-size="17" font-weight="700" fill="#ffffff">App-side Search Latency（20 concurrent × 500 searches）</text>
+    <text x="28" y="56" font-size="13" fill="#9fc3dd">ms · bar-top values are the percentiles</text>
+    <line x1="90" y1="270" x2="680" y2="270" stroke="#3d6e92" stroke-width="2"/>
+    <line x1="90" y1="66" x2="680" y2="66" stroke="#F5B942" stroke-width="2" stroke-dasharray="8 6"/>
+    <text x="684" y="70" font-size="13" fill="#F5B942">target ≤ 300</text>
+    <!-- P50 162ms: y=160, h=110 -->
+    <rect x="110" y="160" width="100" height="110" rx="6" fill="url(#barA)" opacity="0.8"/>
+    <text x="160" y="148" font-size="15" font-weight="700" fill="#9fc3dd" text-anchor="middle">162</text>
+    <text x="160" y="296" font-size="14" fill="#dceaf5" text-anchor="middle">P50</text>
+    <!-- P90 211ms: y=126, h=144 -->
+    <rect x="270" y="126" width="100" height="144" rx="6" fill="url(#barA)" opacity="0.9"/>
+    <text x="320" y="114" font-size="15" font-weight="700" fill="#9fc3dd" text-anchor="middle">211</text>
+    <text x="320" y="296" font-size="14" fill="#dceaf5" text-anchor="middle">P90</text>
+    <!-- P95 226ms: y=116, h=154 -->
+    <rect x="430" y="116" width="100" height="154" rx="6" fill="url(#barA)"/>
+    <text x="480" y="104" font-size="15" font-weight="700" fill="#35C2E4" text-anchor="middle">226</text>
+    <text x="480" y="296" font-size="14" fill="#dceaf5" text-anchor="middle">P95</text>
+    <!-- P99 263ms: y=91, h=179 -->
+    <rect x="590" y="91" width="100" height="179" rx="6" fill="url(#barA)"/>
+    <text x="640" y="79" font-size="15" font-weight="700" fill="#35C2E4" text-anchor="middle">263</text>
+    <text x="640" y="296" font-size="14" fill="#dceaf5" text-anchor="middle">P99</text>
+    <text x="90" y="320" font-size="12.5" fill="#8fb6cf">P95=226ms meets the ≤300ms target, RPS=121.5; optimizations: query-vector LRU cache + async search audit</text>
+  </g>
+
+  <!-- Panel 2: hybrid vs plain -->
+  <g transform="translate(830,130)" filter="url(#shadow)">
+    <rect width="690" height="330" rx="16" fill="#0e3a5c" stroke="#3d6e92" stroke-width="1.5"/>
+    <text x="28" y="34" font-size="17" font-weight="700" fill="#ffffff">Hybrid Search vs Plain（ES P95）</text>
+    <text x="28" y="56" font-size="13" fill="#9fc3dd">ms · BM25 + KNN fused via RRF</text>
+    <line x1="90" y1="270" x2="650" y2="270" stroke="#3d6e92" stroke-width="2"/>
+    <!-- plain 142: y=173 h=97 -->
+    <rect x="140" y="173" width="150" height="97" rx="6" fill="url(#barB)"/>
+    <text x="215" y="160" font-size="16" font-weight="700" fill="#F5B942" text-anchor="middle">142</text>
+    <text x="215" y="296" font-size="14" fill="#dceaf5" text-anchor="middle">Plain BM25</text>
+    <!-- hybrid 156: y=164 h=106 -->
+    <rect x="380" y="164" width="150" height="106" rx="6" fill="url(#barB)"/>
+    <text x="455" y="151" font-size="16" font-weight="700" fill="#F5B942" text-anchor="middle">156</text>
+    <text x="455" y="296" font-size="14" fill="#dceaf5" text-anchor="middle">RRF Hybrid</text>
+    <text x="90" y="320" font-size="12.5" fill="#8fb6cf">Hybrid costs only +14ms (+9.9%) over plain search, in exchange for semantic recall; facets / highlight / deep pagination ride the same pipeline</text>
+  </g>
+
+  <!-- Panel 3: indexing & recall -->
+  <g transform="translate(80,486)" filter="url(#shadow)">
+    <rect width="720" height="210" rx="16" fill="#0e3a5c" stroke="#3d6e92" stroke-width="1.5"/>
+    <text x="28" y="34" font-size="17" font-weight="700" fill="#ffffff">Indexing Throughput &amp; Recall</text>
+    <g font-size="14" fill="#dceaf5">
+      <text x="28" y="76" fill="#35C2E4" font-weight="600">Indexing rate</text>
+      <text x="28" y="100" fill="#9fc3dd">100k chunks (synthetic standards text) ingested in ≈ 17.7s</text>
+      <text x="28" y="136" fill="#35C2E4" font-weight="600">Recall baseline（demo KB, 50 real questions）</text>
+      <text x="28" y="160" fill="#9fc3dd">Recall@5 = 50% (current demo baseline) · DoD target ≥ 85% · regression on every pipeline upgrade</text>
+      <text x="28" y="194" fill="#8fb6cf">Metrics: Recall@5 / MRR / answer faithfulness；rerun via design/validate.py</text>
+    </g>
+  </g>
+
+  <!-- Panel 4: consistency -->
+  <g transform="translate(830,486)" filter="url(#shadow)">
+    <rect width="690" height="210" rx="16" fill="#0e3a5c" stroke="#3d6e92" stroke-width="1.5"/>
+    <text x="28" y="34" font-size="17" font-weight="700" fill="#ffffff">Data Consistency（PG / ES / MinIO）</text>
+    <g font-size="14" fill="#dceaf5">
+      <text x="28" y="80" fill="#35C2E4" font-weight="600">Three-way reconciliation</text>
+      <text x="28" y="104" fill="#9fc3dd">20/20/20 samples fully consistent (file rows · ES docs · MinIO objects)</text>
+      <text x="28" y="140" fill="#35C2E4" font-weight="600">Ops metrics（M12 runbook）</text>
+      <text x="28" y="164" fill="#9fc3dd">RabbitMQ 6-queue depth gauges · health checks · backup.ps1</text>
+      <text x="28" y="194" fill="#8fb6cf">Consistency: idempotent parsing + event-driven pipeline + reconciliation fallback (kb.reconcile.mismatch)</text>
+    </g>
+  </g>
+
+  <text x="80" y="726" font-size="13" fill="#8fb6cf">Data recorded in the local benchmark log: P50=162 / P90=211 / P95=226 / P99=263 ms · RPS 121.5 · plain 142 / hybrid 156 ms · ingest 17.7s · Recall@5 50%</text>
+</svg>

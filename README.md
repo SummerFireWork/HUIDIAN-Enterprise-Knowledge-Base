@@ -41,8 +41,9 @@ From a searchable archive to the "second brain" of an engineering design institu
 | 📑 **Standards-aware Parsing** | Parser SPI with dual-engine adapters, garbled-text cleaning, quality gates, `TreeBasedChunker` (heading-anchored chunking, tables as standalone blocks, cross-page blocks preserved), single source of truth `result.json` |
 | 🏛️ **Knowledge Governance** | Three-tier knowledge bases (PERSONAL / DEPT / PUBLIC), classification tabs (file types + attribute templates), four member roles (owner/admin/member/viewer), apply/invite/approve workflow, ACL written to both PG and ES |
 | 💬 **RAG Q&A** | Spring AI + SSE streaming (`event:answer → done`), answers always carry citations, session grouping, automatic Mock fallback when no LLM key is configured |
+| 🖥️ **Preview (content direct-output)** | Original PDF / text / images streamed through the app proxy (`/files/{id}/content`, HTTP Range → 206), so MinIO never needs a public port or expiring presigned URLs |
 | 📊 **Statistics & Ops** | Materialized-view statistics + ECharts dashboard, project aggregation, health checks, RabbitMQ backlog monitoring, PG/ES/MinIO reconciliation, full audit trail |
-| 🛡️ **Engineering & Security** | Modular monolith (Maven multi-module), Flyway versioned migrations, unified error codes (40001–50001), JWT auth, OpenAPI contract as single source of truth, 141 unit tests |
+| 🛡️ **Engineering & Security** | Modular monolith (Maven multi-module), Nginx single-entry gateway (only port 8081 exposed; middleware ports closed), Flyway versioned migrations, unified error codes (40001–50001), JWT auth, OpenAPI contract as single source of truth, 141 unit tests |
 
 ## 🏗️ System Architecture
 
@@ -60,9 +61,10 @@ From a searchable archive to the "second brain" of an engineering design institu
 > **Run the full system — backend + frontend — with prebuilt artifacts. No source code, no build steps.**
 
 ```bash
-# ① Start all 7 services (frontend + API + middleware)
+# ① Start all 8 services (frontend + API + middleware + nginx gateway)
 docker compose up -d
-#    → UI & API: http://localhost:8081/api/v1/   (dev profile: no login required, guest access)
+#    → UI & API: http://localhost:8081/  (nginx root redirects to /api/v1/; dev profile: no login required, guest access)
+#    → sign in: admin / admin123
 
 # ② Seed synthetic demo documents (optional — validates the search & Q&A loop)
 bash release/scripts/seed-demo.sh
@@ -70,11 +72,9 @@ bash release/scripts/seed-demo.sh
 
 - **Prebuilt artifact**: `release/huidian-kb.jar` — backend + frontend packaged as one runnable jar (Java 21, zero source code required);
 - **Demo data**: `release/demo-docs/*.txt` — synthetic sample documents only, **no organization data**, safe to share;
-- **Deployment topology** (below): Docker Compose, 7 services — PostgreSQL / Elasticsearch / MinIO / RabbitMQ / Redis / BGE-M3 mock embedding / kb-app, each with health checks;
+- **Gateway & security topology** (8 containers): `nginx` (single entry `:8081`) → `kb-app` → PostgreSQL / Elasticsearch / MinIO / RabbitMQ / Redis / BGE-M3 mock. **Only port 8081 is exposed on the host — middleware ports are closed**; original documents are previewed/downloaded via the app proxy (`/files/{id}/content`, HTTP Range), so MinIO stays internal; SSE streaming passes through nginx with buffering disabled.
 
-<p align="center">
-  <img src="docs/oss/assets/quickstart.svg" alt="Deployment topology" width="960">
-</p>
+> The container topology and preview path are reflected in the architecture diagram above. The developer-mode reproduction guide (Maven + pnpm, host ports) lives in the full source release (P5).
 
 > **Source availability**: the complete backend/frontend source and a from-scratch reproduction will be published
 > with the **full open-source release** after the planned knowledge-graph upgrade (see [ROADMAP](ROADMAP.md) · P5).
@@ -92,14 +92,14 @@ bash release/scripts/seed-demo.sh
 | AI | BGE-M3 embedding (Mock service without GPU), DashScope qwen (compatible-mode, Mock fallback) |
 | Frontend | Vue 3.5 + Vite 6 + Element Plus + Pinia + ECharts 5.6 (on-demand chunks) |
 | Contract | OpenAPI (`frontend/api-docs.json` as single source of truth, openapi-generator 7.24 TS SDK) |
-| Deployment | Docker Compose one-click (7 containers), JDK 21 JRE image, health checks, backup scripts |
+| Deployment | Docker Compose one-click (8 containers: nginx gateway + app + 6 middleware), JDK 21 JRE image, health checks, backup scripts |
 
 ## 📁 Repository Layout
 
 ```
 .
 ├─ README.md / LICENSE (Apache-2.0) / ROADMAP.md
-├─ docker-compose.yml        # one-click demo: 7 services, prebuilt jar, health checks
+├─ docker-compose.yml        # one-click demo: nginx gateway + prebuilt jar + 8 services, health checks
 ├─ release/
 │  ├─ huidian-kb.jar         # prebuilt backend+frontend (Java 21, no source required)
 │  ├─ demo-docs/             # synthetic sample documents (safe to share)
