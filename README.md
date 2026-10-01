@@ -14,10 +14,17 @@ From a searchable archive to the "second brain" of an engineering design institu
 
 ## 📸 Screenshot Preview
 
-> Placeholder images — replace with real UI screenshots before release. See the replacement checklist in [`docs/oss/README.md`](docs/oss/README.md).
+<p align="center">
+  <img src="docs/oss/assets/ui-home.png" alt="Workbench home — asset overview, quick entries, AI-confirm tasks" width="880">
+</p>
 
 <p align="center">
-  <img src="docs/oss/assets/screenshot-placeholder.svg" alt="System UI screenshot (to be replaced)" width="820">
+  <img src="docs/oss/assets/ui-search.png" alt="Hybrid search — facets, highlights, page-anchored results" width="430">
+  <img src="docs/oss/assets/ui-qa.png" alt="RAG Q&A — SSE answer with citation cards" width="430">
+</p>
+
+<p align="center">
+  <img src="docs/oss/assets/ui-perms.png" alt="Permission matrix — owner / admin / member / viewer" width="880">
 </p>
 
 ## 🖥️ Demo Walkthrough (video)
@@ -26,7 +33,7 @@ From a searchable archive to the "second brain" of an engineering design institu
 > (37 MB · 1280×720 · recorded on the one-click demo stack.)
 
 <p align="center">
-  <video width="860" controls poster="docs/oss/assets/screenshot-placeholder.svg">
+  <video width="860" controls poster="docs/oss/assets/ui-home.png">
     <source src="docs/oss/assets/demo-video.mp4" type="video/mp4">
     Your browser does not support the video tag — a recorded walkthrough will be published here.
   </video>
@@ -105,7 +112,7 @@ bash release/scripts/seed-demo.sh
 │  └─ scripts/seed-demo.sh   # optional: seed the demo knowledge base
 ├─ es/ bge-m3-mock/          # ES config (IK plugin) & embedding mock service
 └─ docs/
-   ├─ oss/           # open-source assets — architecture / quickstart / benchmark diagrams, screenshot checklist
+   ├─ oss/           # open-source assets — architecture / quickstart / benchmark diagrams, UI screenshots
    ├─ adr/           # architecture decision records (ADR-001..003)
    ├─ algorithms/    # standalone algorithm sketches (RRF fusion, dependency-free)
    └─ api/           # sanitized public OpenAPI subset (search + streaming Q&A)
@@ -151,15 +158,11 @@ Small, dependency-free implementations of the core retrieval algorithms — [`do
 
 ## 📚 Documentation
 
-- Asset index & screenshot replacement checklist: [`docs/oss/README.md`](docs/oss/README.md)
+- Asset index & verified numbers: [`docs/oss/README.md`](docs/oss/README.md)
 - Architecture decision records: [`docs/adr/`](docs/adr/)
 - Algorithm notebook: [`docs/algorithms/`](docs/algorithms/)
 - Sanitized public API subset: [`docs/api/openapi-demo.yaml`](docs/api/openapi-demo.yaml)
 - Roadmap & full-release plan: [`ROADMAP.md`](ROADMAP.md)
-
-## 📸 Screenshot Replacement Checklist (before release)
-
-All UI images in this README are placeholders. Before publishing / resume / interview use, replace them with real screenshots per the checklist in [`docs/oss/README.md`](docs/oss/README.md), and update the benchmark figure with fresh numbers if re-measured.
 
 ## ⚖️ License & Source Availability
 
